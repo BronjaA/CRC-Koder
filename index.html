@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>CRC koder</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    </head>
+    <body>
+        <div class="container mt-4 background">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card pb-4 m-4" style="background-color: gainsboro;">
+                        <!-- zaglavlje -->
+                        <div class="d-flex justify-content-between mt-5 align-items-end">
+                            <h3 class="ml-5">CRC Koder</h3>
+                            <h6 class="mr-5 align-bottom">Armin Bronja, Računarska Tehnika 2020.</h6>
+                        </div>
+                        <hr class="mx-3">
+
+                        <!-- row gde se nalazi unos i gde ce da se stampa polinomalni oblik unetog koda -->
+                        <div class="row mx-2">
+                            <!-- unos poruke i generisuce matrice -->
+                            <div class="col-5">
+                                <table>
+                                    <tr>
+                                        <td><span class="mx-2 font-weight-bold">i(x):</span></td>
+                                        <td><input id="iix" type="text"></td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="mx-2 font-weight-bold">g(x):</span></td>
+                                        <td><input id="igx" type="text"></td>
+                                        <td><button class="ml-2" onclick="izracunaj()">Izračunaj</button></td>
+                                    </tr>
+                                </table>
+                                <div class="mt-2 ml-2">
+                                    <span class="text-muted">i(x) - poruka koja se prenosi u binarnom obliku</span><br>
+                                    <span class="text-muted">g(x) - generišući polinom u binarmom obliku</span>
+                                </div>
+                            </div>
+                            <!-- ovde se ispisuju polinomalni oblici unetih vrednosti -->
+                            <div class="col-7">
+                                <table>
+                                    <tr>
+                                        <td><span id="tix" class="mx-2"></span></td>
+                                        <td><span class="font-weight-bold" id="ix"></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><span id="tgx" class="mx-2"></span></td>
+                                        <td><span class="font-weight-bold" id="gx"></span></td>
+                                    </tr>
+                                </table>
+                                <hr id="granicnik" class="mr-3" style="visibility:hidden;">
+
+                                <!-- tabela gde se ispisuje rezultat crc kodovanja -->
+                                <table>
+                                    <tr>
+                                        <td><span id="trez" class="mx-2"></span></td>
+                                        <td><span id="rez" class="font-weight-bold"></span></td>
+                                    </tr>
+                                </table>
+                                <div style="display: flex; justify-content: flex-end;">
+                                    <button id="btnPostupak" class="btn btn-primary mr-3" type="button" data-toggle="collapse" data-target="#collapseExample" style="visibility: hidden;">Prikaži postupak</button>
+                                </div>
+                            </div>
+                            <div class="collapse mx-3 mt-4 w-100" id="collapseExample">
+                                <div style="white-space: pre-line;" id="postupak" class="card card-body">
+                                    <pre style="white-space: pre-line;" id="p1"></pre>
+                                    <pre style="white-space: pre-line;" id="p2"></pre>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="dekodovanje" class="row mt-3" style="display:none;">
+                            <div class="col">
+                                <div class="accordion mx-4" id="accordionEx" role="tablist" aria-multiselectable="true">
+                                    <div class="card" style="border-radius: 0; border: 1.5px solid lightgray;">
+                                        <div class="card-header" role="tab" id="headingOne1">
+                                            <a id="dk" data-toggle="collapse" data-parent="#accordionEx" href="#collapseOne1" aria-expanded="true"
+                                            aria-controls="collapseOne1"
+                                            style="text-decoration: none; color: black;">
+                                            <h6 class="mb-0">
+                                                Dekodovanje <i class="fas fa-angle-down rotate-icon"></i>
+                                            </h6>
+                                            </a>
+                                        </div>
+
+                                        <div id="collapseOne1" class="collapse" role="tabpanel" aria-labelledby="headingOne1" data-parent="#accordionEx">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col">
+                                                        <table>
+                                                            <tr>
+                                                                <td><span>Ulaz dekodera: </span></td>
+                                                                <td><span id="ulazdek" class="font-weight-bold"></span></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><span class="mr-4">Greška u prenosu: </span></td>
+                                                                <td><input type="text" id="greskadek" oninput="saberiPorDek()"></td>
+                                                                <td><span>+</span></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td></td>
+                                                                <td><hr style="border-top: 2px solid black;"></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td></td>
+                                                                <td><span id="porDek"></span></td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="row">
+                                                            <div class="col-2">
+                                                                <button onclick="dekoduj()">Dekoduj</button>
+                                                            </div>
+                                                            <div class="col-10" id="cardDCRC" style="display: none;">
+                                                                <div class="card" style="background-color: rgb(247, 247, 247);; border-radius: 0;">
+                                                                    <div class="card-body p-2">
+                                                                        <p id="ostatakCRC">Ostatak CRC dekodovanja</p>
+                                                                        <p id="crcPor" class="font-weight-bold">Nije doslo do greske prilikom prenosa</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <script src="script.js"></script>
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>  
+    </body>
+</html>
